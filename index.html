@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDS Database Details</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        .dark-theme {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .dark-theme .card {
+            background-color: #444;
+            color: #fff;
+        }
+
+        .dark-theme .card:hover {
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+        }
+
+        .card-body {
+            transition: background-color 0.3s ease;
+        }
+
+        .dark-theme .card-body {
+            background-color: #444;
+        }
+
+        .btn-theme {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-theme:hover {
+            color: #fff;
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .dark-theme .btn-theme {
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .dark-theme .btn-theme:hover {
+            color: #fff;
+            background-color: #138496;
+            border-color: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">RDS Database Details</h1>
+        <!-- Theme Switching Button -->
+        <div class="text-right mb-3">
+            <button id="themeSwitch" class="btn btn-primary btn-theme">
+                <i class="fas fa-moon"></i> Switch Theme
+            </button>
+        </div>
+
+        <div id="databaseCards" class="card-deck">
+            <!-- Database cards will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and jQuery (needed for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://hvi37k5x18.execute-api.ap-southeast-2.amazonaws.com/s/check')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const databaseCards = document.getElementById('databaseCards');
+                    
+                    Object.keys(data).forEach(key => {
+                        const database = data[key];
+                        const card = document.createElement('div');
+                        card.className = 'card mb-4';
+                        card.innerHTML = `
+                            <div class="card-body">
+                                <h5 class="card-title">${database.DBInstanceIdentifier}</h5>
+                                <p class="card-text"><strong>Engine:</strong> ${database.Engine}</p>
+                                <p class="card-text"><strong>Engine Version:</strong> ${database.EngineVersion}</p>
+                                <p class="card-text"><strong>Instance Class:</strong> ${database.DBInstanceClass}</p>
+                                <button class="btn btn-info btn-theme" onclick="toggleBestPractices('${key}')">Show Best Practices</button>
+                                <div id="${key}BestPractices" class="mt-3" style="display: none;">
+                                    <h6>Best Practice Issues:</h6>
+                                    <ul class="list-group">
+                                        ${database.BestPracticeIssues.map(issue => `<li class="list-group-item">${issue}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                        databaseCards.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    // Optionally handle error display or logging
+                });
+        });
+
+        // Function to toggle best practices visibility
+        function toggleBestPractices(databaseId) {
+            const bestPracticesDiv = document.getElementById(`${databaseId}BestPractices`);
+            const button = event.target;
+            
+            if (bestPracticesDiv.style.display === 'none') {
+                bestPracticesDiv.style.display = 'block';
+                button.textContent = 'Hide Best Practices';
+                button.classList.remove('btn-info');
+                button.classList.add('btn-warning');
+            } else {
+                bestPracticesDiv.style.display = 'none';
+                button.textContent = 'Show Best Practices';
+                button.classList.remove('btn-warning');
+                button.classList.add('btn-info');
+            }
+        }
+
+        // Theme Switching
+        const themeSwitch = document.getElementById('themeSwitch');
+        themeSwitch.addEventListener('click', function() {
+            document.body.classList.toggle('dark-theme');
+            document.querySelectorAll('.card, .card-body').forEach(element => {
+                element.classList.toggle('dark-theme');
+            });
+        });
+    </script>
+</body>
+</html>
+<style>
+    body {
+        background-color: #f0f0f0;
+        transition: background-color 0.3s ease;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .card {
+        margin-bottom: 20px;
+        background-color: #fff;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark-theme {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .dark-theme .card {
+        background-color: #444;
+        color: #fff;
+    }
+
+    .dark-theme .card:hover {
+        box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+    }
+
+    .card-body {
+        transition: background-color 0.3s ease;
+    }
+
+    .dark-theme .card-body {
+        background-color: #444;
+        
+    }
+
+    .btn-theme {
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-theme:hover {
+        color: #fff;
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .dark-theme .btn-theme {
+        color: #fff;
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .dark-theme .btn-theme:hover {
+        color: #fff;
+        background-color: #138496;
+        border-color: #138496;
+    }
+
+    /* Ensure best practices text is visible in dark theme */
+    .dark-theme .list-group-item {
+        color: #fff; /* Set text color to white */
+        background-color: #555; /* Set background color for best practices */
+        border-color: #444; /* Set border color if needed */
+    }
+</style>
